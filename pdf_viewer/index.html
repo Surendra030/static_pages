@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movable Navigation Buttons</title>
+    <title>Movable Navigation Buttons with Watermark</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -45,6 +45,7 @@
             display: flex;
             gap: 10px;
         }
+
         .navigation-buttons1 {
             position: fixed;
             bottom: 0;
@@ -109,14 +110,12 @@
     <div class="navigation-buttons" id="navigation-buttons">
         <button class="scroll-down"></button>
         <button class="scroll-up"></button>
-
     </div>
 
     <div class="navigation-buttons1" id="navigation-buttons1">
         <button class="scroll-down-left"></button>
         <button class="scroll-up-left"></button>
     </div>
-
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script>
@@ -127,17 +126,15 @@
 
         const scrollUpLeft = document.querySelector('.scroll-up-left');
         const scrollDownLeft = document.querySelector('.scroll-down-left');
-        
+
         const navigationButtons = document.getElementById('navigation-buttons');
-        const changePositionBtn = document.getElementById('change-position');
-        let isPositionChangeMode = false;
 
         pdfUpload.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (file && file.type === 'application/pdf') {
                 const fileReader = new FileReader();
 
-                fileReader.onload = function() {
+                fileReader.onload = function () {
                     const typedArray = new Uint8Array(this.result);
                     renderPDF(typedArray);
                 };
@@ -162,9 +159,7 @@
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
 
-                const viewport = page.getViewport({
-                    scale: 1.5
-                });
+                const viewport = page.getViewport({ scale: 1.5 });
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
 
@@ -175,60 +170,60 @@
                 });
 
                 await renderTask.promise;
+
+                // Add watermark
+                addWatermark(canvas, `Page ${pageNumber}`);
+
                 pdfContainer.appendChild(canvas);
             }
         }
 
+        function addWatermark(canvas, text) {
+            const ctx = canvas.getContext('2d');
+            ctx.save();
+            ctx.font = '100px Arial';
+            ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Add watermark text diagonally
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(-Math.PI / 4);
+            ctx.fillText(text, 0, 0);
+            ctx.restore();
+        }
+
         // Scroll navigation logic
         const scrollStep = () => {
-            const containerHeight = pdfContainer.offsetHeight;
-            return 250 ; // Total height - 20% of total height
+            return 250; // Step size for scrolling
         };
 
         scrollUp.addEventListener('click', () => {
-            
             pdfContainer.scrollBy({
                 top: -scrollStep(),
-                behavior: 'smooth'
+                behavior: 'smooth',
             });
         });
 
         scrollDown.addEventListener('click', () => {
             pdfContainer.scrollBy({
                 top: scrollStep(),
-                behavior: 'smooth'
+                behavior: 'smooth',
             });
         });
-        
+
         scrollUpLeft.addEventListener('click', () => {
-            console.log('clicking up btn');
-            
             pdfContainer.scrollBy({
                 top: -scrollStep(),
-                behavior: 'smooth'
+                behavior: 'smooth',
             });
         });
 
         scrollDownLeft.addEventListener('click', () => {
             pdfContainer.scrollBy({
                 top: scrollStep(),
-                behavior: 'smooth'
+                behavior: 'smooth',
             });
-        });
-
-       
-
-        document.addEventListener('dblclick', (event) => {
-            if (isPositionChangeMode) {
-                const x = event.clientX;
-                const y = event.clientY;
-
-                navigationButtons.style.left = `${x}px`;
-                navigationButtons.style.top = `${y}px`;
-                navigationButtons.style.right = 'auto'; // Reset right position
-                navigationButtons.style.bottom = 'auto'; // Reset bottom position
-                isPositionChangeMode = false;
-            }
         });
     </script>
 </body>
