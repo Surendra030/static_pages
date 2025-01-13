@@ -76,25 +76,38 @@
             border-radius: 5px;
         }
 
-        .navigation-buttons button:hover {
-            background-color: #0056b3;
+        .jump-container {
+            position: fixed;
+            bottom: 10px;
+            right: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: white;
+            padding: 2%;
+            z-index: 1;
         }
 
-        #change-position {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            padding: 10px;
+        .jump-container input {
+            width: 60px;
+            padding: 5px;
             font-size: 16px;
-            background-color: #28a745;
-            color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .jump-container button {
+            padding: 5px 10px;
+            font-size: 16px;
             border: none;
+            background-color: #007bff;
+            color: white;
             border-radius: 5px;
             cursor: pointer;
         }
 
-        #change-position:hover {
-            background-color: #218838;
+        .jump-container button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -107,11 +120,15 @@
         <!-- Canvas elements will be appended here -->
     </div>
 
+    <div class="jump-container">
+        <input type="number" id="page-number" min="1" placeholder="Page #">
+        <button id="jump-to-page">Jump</button>
+    </div>
+
     <div class="navigation-buttons" id="navigation-buttons">
         <button class="scroll-down"></button>
         <button class="scroll-up"></button>
     </div>
-    
 
     <div class="navigation-buttons1" id="navigation-buttons1">
         <button class="scroll-down-left"></button>
@@ -124,11 +141,11 @@
         const pdfContainer = document.getElementById('pdf-container');
         const scrollUp = document.querySelector('.scroll-up');
         const scrollDown = document.querySelector('.scroll-down');
-
         const scrollUpLeft = document.querySelector('.scroll-up-left');
         const scrollDownLeft = document.querySelector('.scroll-down-left');
-
-        const navigationButtons = document.getElementById('navigation-buttons');
+        const pageNumberInput = document.getElementById('page-number');
+        const jumpToPageButton = document.getElementById('jump-to-page');
+        let pdfDocument = null;
 
         pdfUpload.addEventListener('change', (event) => {
             const file = event.target.files[0];
@@ -151,10 +168,10 @@
             pdfContainer.innerHTML = '';
 
             // Load PDF.js and get the document
-            const pdf = await pdfjsLib.getDocument(pdfData).promise;
+            pdfDocument = await pdfjsLib.getDocument(pdfData).promise;
 
-            for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
-                const page = await pdf.getPage(pageNumber);
+            for (let pageNumber = 1; pageNumber <= pdfDocument.numPages; pageNumber++) {
+                const page = await pdfDocument.getPage(pageNumber);
 
                 // Create canvas element
                 const canvas = document.createElement('canvas');
@@ -183,7 +200,7 @@
             const ctx = canvas.getContext('2d');
             ctx.save();
             ctx.font = '100px Arial';
-            ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
+            ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
@@ -225,6 +242,20 @@
                 top: scrollStep(),
                 behavior: 'smooth',
             });
+        });
+
+        // Jump to specific page
+        jumpToPageButton.addEventListener('click', () => {
+            const pageNumber = parseInt(pageNumberInput.value, 10);
+            if (pageNumber > 0 && pageNumber <= pdfDocument.numPages) {
+                const canvasElements = pdfContainer.querySelectorAll('canvas');
+                const targetCanvas = canvasElements[pageNumber - 1];
+                if (targetCanvas) {
+                    targetCanvas.scrollIntoView({ behavior: 'smooth' });
+                }
+            } else {
+                alert(`Please enter a valid page number between 1 and ${pdfDocument.numPages}.`);
+            }
         });
     </script>
 </body>
