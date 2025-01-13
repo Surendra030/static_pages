@@ -44,7 +44,6 @@
             right: 20px;
             display: flex;
             gap: 10px;
-            border:  solid rgb(81, 79, 79) 1px;
         }
         .navigation-buttons1 {
             position: fixed;
@@ -52,7 +51,6 @@
             left: 20px;
             display: flex;
             gap: 10px;
-            border:  solid rgb(81, 79, 79) 1px;
         }
 
         .navigation-buttons button {
@@ -109,13 +107,13 @@
     </div>
 
     <div class="navigation-buttons" id="navigation-buttons">
-        <button id="scroll-up"></button>
-        <button id="scroll-down"></button>
+        <button class="scroll-up"></button>
+        <button class="scroll-down"></button>
     </div>
 
-    <div class="navigation-buttons1" id="navigation-buttons">
-        <button id="scroll-down"></button>
-        <button id="scroll-up"></button>
+    <div class="navigation-buttons1" id="navigation-buttons1">
+        <button class="scroll-down-left"></button>
+        <button class="scroll-up-left"></button>
     </div>
 
 
@@ -123,8 +121,12 @@
     <script>
         const pdfUpload = document.getElementById('pdf-upload');
         const pdfContainer = document.getElementById('pdf-container');
-        const scrollUp = document.getElementById('scroll-up');
-        const scrollDown = document.getElementById('scroll-down');
+        const scrollUp = document.querySelector('.scroll-up');
+        const scrollDown = document.querySelector('.scroll-down');
+
+        const scrollUpLeft = document.querySelector('.scroll-up-left');
+        const scrollDownLeft = document.querySelector('.scroll-down-left');
+        
         const navigationButtons = document.getElementById('navigation-buttons');
         const changePositionBtn = document.getElementById('change-position');
         let isPositionChangeMode = false;
@@ -183,6 +185,7 @@
         };
 
         scrollUp.addEventListener('click', () => {
+            
             pdfContainer.scrollBy({
                 top: -scrollStep(),
                 behavior: 'smooth'
@@ -195,11 +198,24 @@
                 behavior: 'smooth'
             });
         });
-
-        // Change position logic
-        changePositionBtn.addEventListener('click', () => {
-            isPositionChangeMode = true;
+        
+        scrollUpLeft.addEventListener('click', () => {
+            console.log('clicking up btn');
+            
+            pdfContainer.scrollBy({
+                top: -scrollStep(),
+                behavior: 'smooth'
+            });
         });
+
+        scrollDownLeft.addEventListener('click', () => {
+            pdfContainer.scrollBy({
+                top: scrollStep(),
+                behavior: 'smooth'
+            });
+        });
+
+       
 
         document.addEventListener('dblclick', (event) => {
             if (isPositionChangeMode) {
