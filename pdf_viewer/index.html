@@ -55,7 +55,7 @@
         }
 
         .navigation-buttons button {
-            padding: 44vh 30px;
+            padding: 42vh 30px;
             font-size: 18px;
             cursor: pointer;
             border: none;
@@ -66,7 +66,7 @@
         }
 
         .navigation-buttons1 button {
-            padding: 44vh 30px;
+            padding: 42vh 30px;
             font-size: 18px;
             cursor: pointer;
             border: none;
@@ -190,7 +190,7 @@
                 await renderTask.promise;
 
                 // Add watermark
-                addWatermark(canvas, `Page ${pageNumber}`);
+                addWatermark(canvas, `${pageNumber} /${ pdfDocument.numPages}`);
 
                 pdfContainer.appendChild(canvas);
             }
