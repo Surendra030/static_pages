@@ -146,56 +146,71 @@
         const pageNumberInput = document.getElementById('page-number');
         const jumpToPageButton = document.getElementById('jump-to-page');
         let pdfDocument = null;
-
+        let currentFilename = '';
+        const viewedPages = {}; // Store canvas positions for scroll detection
+    
         pdfUpload.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (file && file.type === 'application/pdf') {
+                currentFilename = file.name;
                 const fileReader = new FileReader();
-
+    
                 fileReader.onload = function () {
                     const typedArray = new Uint8Array(this.result);
-                    renderPDF(typedArray);
+                    renderPDF(typedArray, currentFilename);
                 };
-
+    
                 fileReader.readAsArrayBuffer(file);
             } else {
                 alert('Please upload a valid PDF file.');
             }
         });
-
-        async function renderPDF(pdfData) {
+    
+        async function renderPDF(pdfData, filename) {
             // Clear previous content
             pdfContainer.innerHTML = '';
-
+    
             // Load PDF.js and get the document
             pdfDocument = await pdfjsLib.getDocument(pdfData).promise;
-
+    
             for (let pageNumber = 1; pageNumber <= pdfDocument.numPages; pageNumber++) {
                 const page = await pdfDocument.getPage(pageNumber);
-
+    
                 // Create canvas element
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
-
+    
                 const viewport = page.getViewport({ scale: 1.5 });
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
-
+    
                 // Render PDF page into canvas
                 const renderTask = page.render({
                     canvasContext: context,
                     viewport: viewport,
                 });
-
+    
                 await renderTask.promise;
-
+    
                 // Add watermark
-                addWatermark(canvas, `${pageNumber} /${ pdfDocument.numPages}`);
-
+                addWatermark(canvas, `${pageNumber} / ${pdfDocument.numPages}`);
+    
                 pdfContainer.appendChild(canvas);
+    
+                // Store canvas position for scroll detection
+                viewedPages[pageNumber] = canvas.offsetTop;
+            }
+    
+            // Scroll to saved page if available
+            const savedPage = localStorage.getItem(filename);
+            if (savedPage && viewedPages[savedPage]) {
+                const targetCanvas = pdfContainer.querySelectorAll('canvas')[savedPage - 1];
+                if (targetCanvas) {
+                    targetCanvas.scrollIntoView({ behavior: 'smooth' });
+                }
             }
         }
-
+    
         function addWatermark(canvas, text) {
             const ctx = canvas.getContext('2d');
             ctx.save();
@@ -203,47 +218,47 @@
             ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-
+    
             // Add watermark text diagonally
             ctx.translate(canvas.width / 2, canvas.height / 2);
             ctx.rotate(-Math.PI / 4);
             ctx.fillText(text, 0, 0);
             ctx.restore();
         }
-
+    
         // Scroll navigation logic
         const scrollStep = () => {
             return 250; // Step size for scrolling
         };
-
+    
         scrollUp.addEventListener('click', () => {
             pdfContainer.scrollBy({
                 top: -scrollStep(),
                 behavior: 'smooth',
             });
         });
-
+    
         scrollDown.addEventListener('click', () => {
             pdfContainer.scrollBy({
                 top: scrollStep(),
                 behavior: 'smooth',
             });
         });
-
+    
         scrollUpLeft.addEventListener('click', () => {
             pdfContainer.scrollBy({
                 top: -scrollStep(),
                 behavior: 'smooth',
             });
         });
-
+    
         scrollDownLeft.addEventListener('click', () => {
             pdfContainer.scrollBy({
                 top: scrollStep(),
                 behavior: 'smooth',
             });
         });
-
+    
         // Jump to specific page
         jumpToPageButton.addEventListener('click', () => {
             const pageNumber = parseInt(pageNumberInput.value, 10);
@@ -257,7 +272,25 @@
                 alert(`Please enter a valid page number between 1 and ${pdfDocument.numPages}.`);
             }
         });
+    
+        // Detect and save the current page in view
+        pdfContainer.addEventListener('scroll', () => {
+            const scrollTop = pdfContainer.scrollTop;
+            let closestPage = 1;
+    
+            for (const [page, offset] of Object.entries(viewedPages)) {
+                if (scrollTop >= offset - 10) {
+                    closestPage = parseInt(page, 10);
+                }
+            }
+    
+            // Save the current page number in localStorage
+            if (currentFilename) {
+                localStorage.setItem(currentFilename, closestPage);
+            }
+        });
     </script>
+    
 </body>
 
 </html>
