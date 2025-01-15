@@ -68,16 +68,17 @@ async function renderPDF(pdfData, filename) {
     }
 
 
-
     // Start sending current page to the server every minute
-    setInterval(() => {
-        sendCurrentPageToServer();
+    setInterval(async () => {
+        await sendCurrentPageToServer();
     }, 60000); // 60000ms = 1 minute
 
-    // Start fetching and displaying saved page number
-    setInterval(() => {
-        fetchAndDisplaySavedPage();
+    // Start fetching and displaying saved page number every 60 seconds
+    setInterval(async () => {
+        await fetchAndDisplaySavedPage();
     }, 60000); // Fetch and update every minute
+
+
 }
 
 function addWatermark(canvas, text) {
