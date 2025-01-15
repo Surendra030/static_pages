@@ -11,6 +11,8 @@ let currentFilename = '';
 const viewedPages = {}; // Store canvas positions for scroll detection
 const currentPageDiv = document.querySelector('.current-page-div'); // div to display current page number
 
+var initial_page_count_scroll = false
+
 pdfUpload.addEventListener('change', (event) => {
     const file = event.target.files[0];
     if (file && file.type === 'application/pdf') {
@@ -65,14 +67,7 @@ async function renderPDF(pdfData, filename) {
         viewedPages[pageNumber] = canvas.offsetTop;
     }
 
-    // Scroll to saved page if available
-    const savedPage = localStorage.getItem(filename);
-    if (savedPage && viewedPages[savedPage]) {
-        const targetCanvas = pdfContainer.querySelectorAll('canvas')[savedPage - 1];
-        if (targetCanvas) {
-            targetCanvas.scrollIntoView({ behavior: 'smooth' });
-        }
-    }
+
 
     // Start sending current page to the server every minute
     setInterval(() => {
@@ -102,6 +97,8 @@ function addWatermark(canvas, text) {
 
 // Send current page to server every minute
 async function sendCurrentPageToServer() {
+    console.log("Post method called..");
+
     const currentPage = getCurrentPageNumber();
     if (currentPage !== null && currentFilename) {
         const data = {
@@ -119,7 +116,8 @@ async function sendCurrentPageToServer() {
             });
 
             const result = await response.json();
-            console.log('Page number sent:', result);
+            currentPageDiv.textContent = `Saved Page Number: ${currentPage}`;
+
         } catch (error) {
             console.error('Error sending page number:', error);
         }
@@ -141,6 +139,11 @@ function getCurrentPageNumber() {
 
 // Fetch and display the saved page number from the server
 async function fetchAndDisplaySavedPage() {
+    console.log("Get method called..");
+    setTimeout(() => {
+
+    }, 3000);
+
     try {
         const response = await fetch('https://project-books-data.vercel.app/get-page-num');
         const booksData = await response.json();
@@ -148,10 +151,27 @@ async function fetchAndDisplaySavedPage() {
         // Find the book data by filename and display the page number
         const bookData = booksData.find(book => book.book_name === currentFilename);
         if (bookData) {
-            const savedPageNumber = bookData.current_page;
+            let savedPageNumber = bookData.current_page;
             currentPageDiv.textContent = `Saved Page Number: ${savedPageNumber}`;
+            
+            if (initial_page_count_scroll === false) {
+                // Scroll to saved page if available
+                if (savedPageNumber) {
+                    savedPageNumber = Number(savedPageNumber) - 1
+                    setTimeout(() => {
+                        
+                    }, 1000);
+                    const targetCanvas = pdfContainer.querySelectorAll('canvas')[savedPageNumber];
+                    if (targetCanvas) {
+                        targetCanvas.scrollIntoView({ behavior: 'smooth' });
+                        initial_page_count_scroll = true
+
+                    }
+                    
+                }
+            }
         }
-        else{
+        else {
             currentPageDiv.textContent = `Saved Page Number: This is newly added book`;
 
         }
