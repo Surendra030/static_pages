@@ -186,25 +186,25 @@ const scrollStep = () => {
     return 250; // Step size for scrolling
 };
 
-document.addEventListener("keydown", function (event) {
-    let keybtn = event.key
-    if (keybtn === 'PageDown') {
-        scrollUp.addEventListener('click', () => {
+document.addEventListener("keydown", function(event) {
+    let key_btn = event.key
+    if(key_btn ==='PageUp'){
             pdfContainer.scrollBy({
                 top: -scrollStep(),
                 behavior: 'smooth',
             });
-        });
+        
     }
-    if (keybtn === 'PageUp') {
-        scrollDown.addEventListener('click', () => {
-            pdfContainer.scrollBy({
-                top: scrollStep(),
-                behavior: 'smooth',
-            });
+    if(key_btn ==='PageDown'){
+        pdfContainer.scrollBy({
+            top: scrollStep(),
+            behavior: 'smooth',
         });
-    }
+    
+}
+
 });
+
 
 
 scrollUp.addEventListener('click', () => {
