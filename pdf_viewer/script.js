@@ -154,13 +154,13 @@ async function fetchAndDisplaySavedPage() {
         if (bookData) {
             let savedPageNumber = bookData.current_page;
             currentPageDiv.textContent = `Saved Page Number: ${savedPageNumber}`;
-            
+
             if (initial_page_count_scroll === false) {
                 // Scroll to saved page if available
                 if (savedPageNumber) {
                     savedPageNumber = Number(savedPageNumber) - 1
                     setTimeout(() => {
-                        
+
                     }, 1000);
                     const targetCanvas = pdfContainer.querySelectorAll('canvas')[savedPageNumber];
                     if (targetCanvas) {
@@ -168,7 +168,7 @@ async function fetchAndDisplaySavedPage() {
                         initial_page_count_scroll = true
 
                     }
-                    
+
                 }
             }
         }
@@ -185,6 +185,27 @@ async function fetchAndDisplaySavedPage() {
 const scrollStep = () => {
     return 250; // Step size for scrolling
 };
+
+document.addEventListener("keydown", function (event) {
+    let keybtn = event.key
+    if (keybtn === 'PageDown') {
+        scrollUp.addEventListener('click', () => {
+            pdfContainer.scrollBy({
+                top: -scrollStep(),
+                behavior: 'smooth',
+            });
+        });
+    }
+    if (keybtn === 'PageUp') {
+        scrollDown.addEventListener('click', () => {
+            pdfContainer.scrollBy({
+                top: scrollStep(),
+                behavior: 'smooth',
+            });
+        });
+    }
+});
+
 
 scrollUp.addEventListener('click', () => {
     pdfContainer.scrollBy({
